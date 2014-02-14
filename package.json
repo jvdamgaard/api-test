@@ -1,0 +1,64 @@
+{
+  "name": "api-test",
+  "version": "0.0.1",
+  "author": {
+    "name": "Jakob Viskum Damgaard",
+    "email": "jakob.viskum.damgaard@gmail.com"
+  },
+  "description": "Test of API with MongoDB, Node.js, Expressjs and Mongoose",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jvdamgaard/api-test.git"
+  },
+  "keywords": [
+    "RESTfull",
+    "API",
+    "Node.js",
+    "MongoDB",
+    "Mongoose",
+    "Expressjs"
+  ],
+  "scripts": {
+    "start": "node app.js"
+  },
+  "contributors": [
+    {
+      "name": "Jakob Viskum Damgaard",
+      "email": "jakob.viskum.damgaard@gmail.com"
+    }
+  ],
+  "dependencies": {
+    "express": "3.4.8",
+    "mongodb": "1.3.23",
+    "mongoose": "~3.8.7",
+    "async": "~0.2.10"
+  },
+  "devDependencies": {
+    "bluebird": "1.0.1",
+    "grunt": "0.4.2",
+    "grunt-contrib-jshint": "0.8.0",
+    "grunt-express-server": "0.4.11",
+    "grunt-contrib-watch": "0.5.3",
+    "grunt-shell-spawn": "0.3.0",
+    "grunt-todos": "0.2.0",
+    "jshint-stylish": "0.1.5",
+    "lodash": "2.4.1",
+    "require-grunt-configs": "0.4.0",
+    "grunt-contrib-clean": "~0.5.0"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "bugs": {
+    "url": "https://github.com/jvdamgaard/api-test/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jvdamgaard/employme.at/raw/master/LICENSE"
+    }
+  ],
+  "analyze": false,
+  "readmeFilename": "README.md"
+}
