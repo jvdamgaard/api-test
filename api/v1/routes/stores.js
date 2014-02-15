@@ -1,4 +1,5 @@
 // Dependencies
+var _ = require('lodash');
 var config = require('../config.json');
 var crud = require('../crud');
 
@@ -17,10 +18,12 @@ var filters = {
 
 // Aliases
 var aliases = [{
-    url: '/brand/:brand',
+    url: '/:brand',
     rewrite: function(req) {
-        req.query.brand = req.params.brand;
-        req.url = BASE_URL + '?brand=' + req.query.brand;
+        if (_.indexOf(config.brands, req.params.brand) >= 0) {
+            req.query.brand = req.params.brand;
+            req.url = BASE_URL + '?brand=' + req.query.brand;
+        }
     }
 }];
 

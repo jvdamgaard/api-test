@@ -5,8 +5,13 @@ var sort = require('./sort');
 var fields = require('./fields');
 var pagination = require('./pagination');
 var filterItems = require('./filters');
-var map = require('./map');
+var rateLimit = require('./rateLimit');
 var async = require('async');
+
+var mockUser = {
+    resetRate: 15 * 60 * 1000,
+    limit: 10
+};
 
 module.exports = function(app, Model, baseUrl, filters, aliases) {
 
@@ -58,6 +63,10 @@ module.exports = function(app, Model, baseUrl, filters, aliases) {
 
     // Read a list of pages
     app.get(baseUrl, function(req, res) {
+        rateLimit(res, mockUser);
+        if (mockUser.remaining === 0) {
+            return res.send(429);
+        }
         Model.find(function(err, items) {
             if (err) {
                 return res.json(400, err);
@@ -66,7 +75,6 @@ module.exports = function(app, Model, baseUrl, filters, aliases) {
             items = sort(items, req);
             items = pagination(items, req, res);
             items = fields(items, req);
-            items = map(items);
             return res.json(items);
         });
     });
