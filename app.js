@@ -8,10 +8,12 @@
 // Dependencies
 var express = require('express');
 var app = express();
+var passport = require('passport');
 
 app.use(express.compress());
 app.use(express.json());
 app.use(express.urlencoded());
+app.use(passport.initialize());
 app.use(app.router);
 
 // Api v1

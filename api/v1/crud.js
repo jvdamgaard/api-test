@@ -1,7 +1,7 @@
 // Dependencies
 var _ = require('lodash');
 var async = require('async');
-var passport = require('passport-http');
+var passport = require('passport');
 
 var sort = require('./sort');
 var fields = require('./fields');
@@ -11,19 +11,14 @@ var rateLimit = require('./rateLimit');
 var User = require('./models/user');
 var config = require('./config.json');
 
-var BasicStrategy = passport.Strategy;
+var BasicStrategy = require('passport-http').BasicStrategy;
 passport.use(new BasicStrategy(
     function(username, password, done) {
-        User.findOne({
-            _id: username
-        }, function(err, user) {
+        User.findById(username, function(err, user) {
             if (err) {
                 return done(err);
             }
             if (!user) {
-                return done(null, false);
-            }
-            if (!user.validPassword(password)) {
                 return done(null, false);
             }
             return done(null, user);
@@ -83,40 +78,37 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     ///////////
 
     // Read a list of pages
-    app.get(baseUrl, function(req, res) {
-        getUser(req, function(user) {
-            // Unauthorized
-            if (!user) {
-                return res.send(401);
-            }
+    app.get(baseUrl, passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
 
-            // Unauthorized for specific ressource and method
-            if (user.ressources[ressourceName].post === false) {
-                return res.send(403);
-            }
-            if (user.ressources.general.post === false) {
-                return res.send(403);
-            }
+        var user = req.user;
 
-            // Calc rate limit
-            rateLimit(res, user.rateLimit);
-            if (user.rateLimit.remaining === 0) {
-                return res.send(429);
+        // Unauthorized for specific ressource and method
+        if (user.ressources[ressourceName].post === false) {
+            return res.send(403);
+        }
+        if (user.ressources.general.post === false) {
+            return res.send(403);
+        }
+
+        // Calc rate limit
+        rateLimit(res, user.rateLimit);
+        if (user.rateLimit.remaining === 0) {
+            return res.send(429);
+        }
+        Model.find(function(err, items) {
+            if (err) {
+                return res.json(400, err);
             }
-            Model.find(function(err, items) {
-                if (err) {
-                    return res.json(400, err);
-                }
-                if (filters) {
-                    items = filterItems(filters, items, req);
-                }
-                items = sort(items, req);
-                items = pagination(items, req, res);
-                items = fields(items, req);
-                return res.json(items);
-            });
+            if (filters) {
+                items = filterItems(filters, items, req);
+            }
+            items = sort(items, req);
+            items = pagination(items, req, res);
+            items = fields(items, req);
+            return res.json(items);
         });
-
     });
 
     // Read a single page by id
