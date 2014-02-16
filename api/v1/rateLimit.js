@@ -1,19 +1,24 @@
-module.exports = function(res, options) {
+module.exports = function(user, res) {
     var now = new Date().getTime();
-    var nextReset = Math.ceil(now / options.resetRate) * options.resetRate;
+    var nextReset = Math.ceil(now / user.rateLimit.resetRate) * user.rateLimit.resetRate;
 
     // Reset limit
-    if (!options.currentReset || options.currentReset < nextReset) {
-        options.currentReset = nextReset;
-        options.remaining = options.limit;
+    if (!user.rateLimit.currentReset || user.rateLimit.currentReset < nextReset) {
+        user.rateLimit.currentReset = nextReset;
+        user.rateLimit.remaining = user.rateLimit.limit;
     }
 
-    options.remaining--;
-    if (options.remaining < 0) {
-        options.remaining = 0;
+    user.rateLimit.remaining--;
+    if (user.rateLimit.remaining < 0) {
+        user.rateLimit.remaining = 0;
     }
 
-    res.setHeader('X-RateLimit-Limit', options.limit);
-    res.setHeader('X-RateLimit-Remaining', options.remaining);
+    res.setHeader('X-RateLimit-Limit', user.rateLimit.limit);
+    res.setHeader('X-RateLimit-Remaining', user.rateLimit.remaining);
     res.setHeader('X-RateLimit-Reset', Math.ceil((nextReset - now) / 1000));
+
+    if (user.rateLimit.remaining === 0) {
+        return true;
+    }
+    return false;
 };

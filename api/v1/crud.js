@@ -1,30 +1,17 @@
 // Dependencies
 var _ = require('lodash');
 var async = require('async');
-var passport = require('passport');
 
+var passport = require('passport');
+require('./passport-settings');
+
+var access = require('./access');
 var sort = require('./sort');
 var fields = require('./fields');
 var pagination = require('./pagination');
 var filterItems = require('./filters');
 var rateLimit = require('./rateLimit');
-var User = require('./models/user');
 var config = require('./config.json');
-
-var BasicStrategy = require('passport-http').BasicStrategy;
-passport.use(new BasicStrategy(
-    function(username, password, done) {
-        User.findById(username, function(err, user) {
-            if (err) {
-                return done(err);
-            }
-            if (!user) {
-                return done(null, false);
-            }
-            return done(null, user);
-        });
-    }
-));
 
 module.exports = function(app, Model, ressourceName, filters, aliases) {
 
@@ -54,8 +41,23 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         });
     };
 
-    // Create a single page
-    app.post(baseUrl, function(req, res) {
+    // Create page
+    app.post(baseUrl, passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
+        var user = JSON.parse(req.user);
+
+        // User has access to this ressource
+        if (!access(user, 'post', ressourceName)) {
+            return res.send(403);
+        }
+
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
+            return res.send(429);
+        }
+
+        // Bulk create
         if (_.isArray(req.body)) {
             async.map(req.body, saveItem, function(err, items) {
                 if (err) {
@@ -63,6 +65,8 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
                 }
                 return res.json(201, items);
             });
+
+            // Create single
         } else {
             saveItem(req.body, function(err, item) {
                 if (err) {
@@ -81,20 +85,15 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     app.get(baseUrl, passport.authenticate('basic', {
         session: false
     }), function(req, res) {
+        var user = JSON.parse(req.user);
 
-        var user = req.user;
-
-        // Unauthorized for specific ressource and method
-        if (user.ressources[ressourceName].post === false) {
-            return res.send(403);
-        }
-        if (user.ressources.general.post === false) {
+        // User has access to this ressource
+        if (!access(user, 'get', ressourceName)) {
             return res.send(403);
         }
 
-        // Calc rate limit
-        rateLimit(res, user.rateLimit);
-        if (user.rateLimit.remaining === 0) {
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
             return res.send(429);
         }
         Model.find(function(err, items) {
@@ -112,7 +111,20 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     });
 
     // Read a single page by id
-    app.get(baseUrl + '/:id', function(req, res) {
+    app.get(baseUrl + '/:id', passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
+        var user = JSON.parse(req.user);
+
+        // User has access to this ressource
+        if (!access(user, 'get', ressourceName)) {
+            return res.send(403);
+        }
+
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
+            return res.send(429);
+        }
         Model.findById(req.params.id, function(err, item) {
             if (err) {
                 return res.json(404, err);
@@ -127,7 +139,20 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     /////////////
 
     // Update a list of pages
-    app.put(baseUrl, function(req, res) {
+    app.put(baseUrl, passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
+        var user = JSON.parse(req.user);
+
+        // User has access to this ressource
+        if (!access(user, 'put', ressourceName)) {
+            return res.send(403);
+        }
+
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
+            return res.send(429);
+        }
         if (!_.isArray(req.body)) {
             return res.json(404, {
                 error: 'Body of request has to be an array when bulk updating'
@@ -167,7 +192,20 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     });
 
     // Update a single page by id
-    app.put(baseUrl + '/:id', function(req, res) {
+    app.put(baseUrl + '/:id', passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
+        var user = JSON.parse(req.user);
+
+        // User has access to this ressource
+        if (!access(user, 'put', ressourceName)) {
+            return res.send(403);
+        }
+
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
+            return res.send(429);
+        }
         Model.findById(req.params.id, function(err, item) {
             if (err) {
                 return res.json(404, err);
@@ -187,7 +225,20 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     /////////////
 
     // Delete all pages
-    app.delete(baseUrl, function(req, res) {
+    app.delete(baseUrl, passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
+        var user = JSON.parse(req.user);
+
+        // User has access to this ressource
+        if (!access(user, 'delete', ressourceName)) {
+            return res.send(403);
+        }
+
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
+            return res.send(429);
+        }
         Model.remove(function(err) {
             if (err) {
                 return res.json(400, err);
@@ -197,7 +248,20 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     });
 
     // Delete a single page by id
-    app.delete(baseUrl + '/:id', function(req, res) {
+    app.delete(baseUrl + '/:id', passport.authenticate('basic', {
+        session: false
+    }), function(req, res) {
+        var user = JSON.parse(req.user);
+
+        // User has access to this ressource
+        if (!access(user, 'delete', ressourceName)) {
+            return res.send(403);
+        }
+
+        // Has user reached rate limit
+        if (rateLimit(user, res)) {
+            return res.send(429);
+        }
         Model.findById(req.params.id, function(err, item) {
             if (err) {
                 return res.json(404, err);
