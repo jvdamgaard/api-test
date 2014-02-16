@@ -28,5 +28,5 @@ var aliases = [{
 }];
 
 module.exports = function(app) {
-    crud(app, Store, BASE_URL, filters, aliases);
+    crud(app, Store, 'stores', filters, aliases);
 };

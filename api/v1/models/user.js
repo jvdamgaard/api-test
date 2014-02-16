@@ -2,15 +2,15 @@
 var mongoose = require('mongoose');
 
 // Schemas
-var Store = require('../schemas/store');
+var User = require('../schemas/user');
 
-Store.set('toJSON', {
+User.set('toJSON', {
     transform: function(doc, item) {
 
         // Add
 
         // Transform
-        item.id = item._id;
+        item.key = item._id;
 
         // Remove
         delete item._id;
@@ -20,4 +20,4 @@ Store.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Store', Store);
+module.exports = mongoose.model('User', User);

@@ -18,12 +18,15 @@ module.exports = function(grunt) {
     grunt.registerTask('default', function() {
         grunt.loadNpmTasks('grunt-contrib-clean');
         grunt.loadNpmTasks('grunt-shell-spawn');
+        grunt.loadNpmTasks('grunt-wait');
         grunt.loadNpmTasks('grunt-express-server');
         grunt.loadNpmTasks('grunt-contrib-watch');
         grunt.task.run([
             'clean',
+            'shell:mongod',
+            'wait:mongod',
             'shell:mongo',
-            'shell:mongoData',
+            'wait:mongo',
             'express',
             'watch:server'
         ]);

@@ -1,27 +1,49 @@
 // Dependencies
 var _ = require('lodash');
 var async = require('async');
+var passport = require('passport-http');
+
 var sort = require('./sort');
 var fields = require('./fields');
 var pagination = require('./pagination');
 var filterItems = require('./filters');
 var rateLimit = require('./rateLimit');
-var async = require('async');
+var User = require('./models/user');
+var config = require('./config.json');
 
-var mockUser = {
-    resetRate: 15 * 60 * 1000,
-    limit: 10
-};
+var BasicStrategy = passport.Strategy;
+passport.use(new BasicStrategy(
+    function(username, password, done) {
+        User.findOne({
+            _id: username
+        }, function(err, user) {
+            if (err) {
+                return done(err);
+            }
+            if (!user) {
+                return done(null, false);
+            }
+            if (!user.validPassword(password)) {
+                return done(null, false);
+            }
+            return done(null, user);
+        });
+    }
+));
 
-module.exports = function(app, Model, baseUrl, filters, aliases) {
+module.exports = function(app, Model, ressourceName, filters, aliases) {
+
+    var baseUrl = '/v' + config.version.major + '/' + ressourceName;
 
     // Aliases
-    _.forEach(aliases, function(alias) {
-        app.get(baseUrl + alias.url, function(req, res, next) {
-            alias.rewrite(req);
-            next();
+    if (aliases) {
+        _.forEach(aliases, function(alias) {
+            app.get(baseUrl + alias.url, function(req, res, next) {
+                alias.rewrite(req);
+                next();
+            });
         });
-    });
+    }
 
     /////////////
     /// CREATE //
@@ -41,7 +63,6 @@ module.exports = function(app, Model, baseUrl, filters, aliases) {
     app.post(baseUrl, function(req, res) {
         if (_.isArray(req.body)) {
             async.map(req.body, saveItem, function(err, items) {
-                console.log(err);
                 if (err) {
                     return res.json(400, err);
                 }
@@ -63,20 +84,39 @@ module.exports = function(app, Model, baseUrl, filters, aliases) {
 
     // Read a list of pages
     app.get(baseUrl, function(req, res) {
-        rateLimit(res, mockUser);
-        if (mockUser.remaining === 0) {
-            return res.send(429);
-        }
-        Model.find(function(err, items) {
-            if (err) {
-                return res.json(400, err);
+        getUser(req, function(user) {
+            // Unauthorized
+            if (!user) {
+                return res.send(401);
             }
-            items = filterItems(filters, items, req);
-            items = sort(items, req);
-            items = pagination(items, req, res);
-            items = fields(items, req);
-            return res.json(items);
+
+            // Unauthorized for specific ressource and method
+            if (user.ressources[ressourceName].post === false) {
+                return res.send(403);
+            }
+            if (user.ressources.general.post === false) {
+                return res.send(403);
+            }
+
+            // Calc rate limit
+            rateLimit(res, user.rateLimit);
+            if (user.rateLimit.remaining === 0) {
+                return res.send(429);
+            }
+            Model.find(function(err, items) {
+                if (err) {
+                    return res.json(400, err);
+                }
+                if (filters) {
+                    items = filterItems(filters, items, req);
+                }
+                items = sort(items, req);
+                items = pagination(items, req, res);
+                items = fields(items, req);
+                return res.json(items);
+            });
         });
+
     });
 
     // Read a single page by id

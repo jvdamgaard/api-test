@@ -5,7 +5,8 @@
         "patch": 0
     },
     "resources": [
-        "stores"
+        "stores",
+        "users"
     ],
     "brands": [
         "foetex",

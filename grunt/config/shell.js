@@ -14,7 +14,7 @@ module.exports = {
             async: true
         }
     },
-    mongoData: {
+    mongod: {
         command: 'mongod --dbpath ' + path.resolve(__dirname, '../../data'),
         options: {
             async: true
