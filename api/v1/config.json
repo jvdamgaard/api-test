@@ -16,5 +16,6 @@
         "nettopl",
         "bilka",
         "salling"
-    ]
+    ],
+    "cacheReset": 600000
 }

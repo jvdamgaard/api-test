@@ -11,6 +11,7 @@ var fields = require('./fields');
 var pagination = require('./pagination');
 var filterItems = require('./filters');
 var rateLimit = require('./rateLimit');
+var cache = require('./caching');
 var config = require('./config.json');
 
 module.exports = function(app, Model, ressourceName, filters, aliases) {
@@ -96,6 +97,11 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         if (rateLimit(user, res)) {
             return res.send(429);
         }
+
+        if (cache.get(req.url)) {
+            return res.json(cache.get(req.url));
+        }
+
         Model.find(function(err, items) {
             if (err) {
                 return res.json(400, err);
@@ -106,6 +112,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
             items = sort(items, req);
             items = pagination(items, req, res);
             items = fields(items, req);
+            cache.set(req.url, items);
             return res.json(items);
         });
     });
@@ -125,6 +132,11 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         if (rateLimit(user, res)) {
             return res.send(429);
         }
+
+        if (cache.get(req.url)) {
+            return res.json(cache.get(req.url));
+        }
+
         Model.findById(req.params.id, function(err, item) {
             if (err) {
                 return res.json(404, err);

@@ -10,7 +10,7 @@ User.set('toJSON', {
         // Add
 
         // Transform
-        item.key = item._id;
+        item.id = item._id;
 
         // Remove
         delete item._id;
