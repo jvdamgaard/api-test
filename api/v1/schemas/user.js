@@ -9,10 +9,14 @@ var options = {
 };
 _.forEach(config.ressources, function(ressource) {
     options.ressources[ressource] = {
-        post: Boolean,
-        get: Boolean,
-        put: Boolean,
-        'delete': Boolean
+        postSingle: Boolean,
+        postMultiple: Boolean,
+        getSingle: Boolean,
+        getMultiple: Boolean,
+        putSingle: Boolean,
+        putMultiple: Boolean,
+        deleteSingle: Boolean,
+        deleteMultiple: Boolean
     };
 });
 
@@ -33,44 +37,84 @@ module.exports = new Schema(_.assign(options, {
     },
     ressources: {
         general: {
-            post: {
+            postSingle: {
                 type: Boolean,
                 required: true,
                 default: false
             },
-            get: {
+            postBulk: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            getSingle: {
                 type: Boolean,
                 required: true,
                 default: true
             },
-            put: {
+            getMultiple: {
+                type: Boolean,
+                required: true,
+                default: true
+            },
+            putSingle: {
                 type: Boolean,
                 required: true,
                 default: false
             },
-            'delete': {
+            putMultiple: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            deleteSingle: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            deleteMultiple: {
                 type: Boolean,
                 required: true,
                 default: false
             }
         },
         users: {
-            post: {
+            postSingle: {
                 type: Boolean,
                 required: true,
                 default: false
             },
-            get: {
+            postBulk: {
                 type: Boolean,
                 required: true,
                 default: false
             },
-            put: {
+            getSingle: {
                 type: Boolean,
                 required: true,
                 default: false
             },
-            'delete': {
+            getMultiple: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            putSingle: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            putMultiple: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            deleteSingle: {
+                type: Boolean,
+                required: true,
+                default: false
+            },
+            deleteMultiple: {
                 type: Boolean,
                 required: true,
                 default: false

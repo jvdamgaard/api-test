@@ -49,7 +49,10 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'post', ressourceName)) {
+        if (_.isArray(req.body) && !access(user, 'postMultiple', ressourceName)) {
+            return res.send(403);
+        }
+        if (!_.isArray(req.body) && !access(user, 'postSingle', ressourceName)) {
             return res.send(403);
         }
 
@@ -89,7 +92,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'get', ressourceName)) {
+        if (!access(user, 'getMultiple', ressourceName)) {
             return res.send(403);
         }
 
@@ -98,21 +101,49 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
             return res.send(429);
         }
 
-        if (cache.get(req.url)) {
-            return res.json(cache.get(req.url));
+        // if (cache.get(req.url)) {
+        //     return res.json(cache.get(req.url));
+        // }
+
+        var query = Model.find({});
+
+        // Filters
+        var notFilterKeys = 'sort page perpage fields'.split(' ');
+        _.forOwn(req.query, function(val, key) {
+            if (notFilterKeys.indexOf(key) === -1) {
+                query.where(key).equals(val);
+            }
+        });
+
+        // Sort
+        if (req.query.sort) {
+            var sortString = req.query.sort.split(',').join(' ');
+            query.sort(sortString);
         }
 
-        Model.find(function(err, items) {
+        // Pagination
+        var page = parseInt(req.query.page) || 1;
+        var perPage = parseInt(req.query.perpage) || 30;
+        if (perPage > 100 || perPage < 1) {
+            perPage = 30;
+        }
+        query.skip((page - 1) * perPage).limit(perPage);
+        // TODO: Set link headers
+
+        // Select fields to output
+        if (req.query.fields) {
+            var fieldsString = req.query.fields.split(',').join(' ');
+            console.log(fieldsString);
+            query.select(fieldsString);
+        }
+
+        // Optimize output
+        query.lean();
+
+        query.exec(function(err, items) {
             if (err) {
                 return res.json(400, err);
             }
-            if (filters) {
-                items = filterItems(filters, items, req);
-            }
-            items = sort(items, req);
-            items = pagination(items, req, res);
-            items = fields(items, req);
-            cache.set(req.url, items);
             return res.json(items);
         });
     });
@@ -124,7 +155,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'get', ressourceName)) {
+        if (!access(user, 'getSingle', ressourceName)) {
             return res.send(403);
         }
 
@@ -157,7 +188,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'put', ressourceName)) {
+        if (!access(user, 'putMultiple', ressourceName)) {
             return res.send(403);
         }
 
@@ -210,7 +241,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'put', ressourceName)) {
+        if (!access(user, 'putSingle', ressourceName)) {
             return res.send(403);
         }
 
@@ -243,7 +274,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'delete', ressourceName)) {
+        if (!access(user, 'deleteMultiple', ressourceName)) {
             return res.send(403);
         }
 
@@ -266,7 +297,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'delete', ressourceName)) {
+        if (!access(user, 'deleteSingle', ressourceName)) {
             return res.send(403);
         }
 
