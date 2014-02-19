@@ -2,14 +2,9 @@
 var _ = require('lodash');
 var async = require('async');
 
-var passport = require('passport');
-require('./passport-settings');
-
 var access = require('./access');
-var sort = require('./sort');
 var fields = require('./fields');
 var pagination = require('./pagination');
-var filterItems = require('./filters');
 var rateLimit = require('./rateLimit');
 var cache = require('./caching');
 var config = require('./config.json');
@@ -43,9 +38,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     };
 
     // Create page
-    app.post(baseUrl, passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.post(baseUrl, function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
@@ -86,9 +79,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     ///////////
 
     // Read a list of pages
-    app.get(baseUrl, passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.get(baseUrl, function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
@@ -100,10 +91,6 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         if (rateLimit(user, res)) {
             return res.send(429);
         }
-
-        // if (cache.get(req.url)) {
-        //     return res.json(cache.get(req.url));
-        // }
 
         var query = Model.find({});
 
@@ -121,38 +108,39 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
             query.sort(sortString);
         }
 
-        // Pagination
-        var page = parseInt(req.query.page) || 1;
-        var perPage = parseInt(req.query.perpage) || 30;
-        if (perPage > 100 || perPage < 1) {
-            perPage = 30;
-        }
-        query.skip((page - 1) * perPage).limit(perPage);
-        // TODO: Set link headers
-
-        // Select fields to output
-        if (req.query.fields) {
-            var fieldsString = req.query.fields.split(',').join(' ');
-            console.log(fieldsString);
-            query.select(fieldsString);
-        }
-
-        // Optimize output
-        query.lean();
-
-        // Eecute the query
-        query.exec(function(err, items) {
+        // Count total elements
+        Model.find(query).count(function(err, count) {
             if (err) {
                 return res.json(400, err);
             }
-            return res.json(items);
+            res.setHeader('X-Total-Count', count);
+
+            // Pagination
+            var paginationOptions = pagination(req, res, count);
+            query.skip(paginationOptions.from).limit(paginationOptions.limit);
+
+            // Select fields to output
+            if (req.query.fields) {
+                var fieldsString = req.query.fields.split(',').join(' ');
+                query.select(fieldsString);
+            }
+
+            // Optimize output
+            query.lean();
+
+            // Eecute the query
+            query.exec(function(err, items) {
+                if (err) {
+                    return res.json(400, err);
+                }
+                return res.json(items);
+            });
         });
+
     });
 
     // Read a single page by id
-    app.get(baseUrl + '/:id', passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.get(baseUrl + '/:id', function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
@@ -183,9 +171,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     /////////////
 
     // Update a list of pages
-    app.put(baseUrl, passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.put(baseUrl, function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
@@ -236,9 +222,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     });
 
     // Update a single page by id
-    app.put(baseUrl + '/:id', passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.put(baseUrl + '/:id', function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
@@ -269,9 +253,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     /////////////
 
     // Delete all pages
-    app.delete(baseUrl, passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.delete(baseUrl, function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
@@ -292,9 +274,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
     });
 
     // Delete a single page by id
-    app.delete(baseUrl + '/:id', passport.authenticate('basic', {
-        session: false
-    }), function(req, res) {
+    app.delete(baseUrl + '/:id', function(req, res) {
         var user = JSON.parse(req.user);
 
         // User has access to this ressource
