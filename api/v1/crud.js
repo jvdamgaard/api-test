@@ -140,6 +140,7 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
         // Optimize output
         query.lean();
 
+        // Eecute the query
         query.exec(function(err, items) {
             if (err) {
                 return res.json(400, err);
