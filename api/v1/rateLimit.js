@@ -1,3 +1,7 @@
+// Dependencies
+var _ = require('lodash');
+var User = require('./models/user');
+
 module.exports = function(user, res) {
     var now = new Date().getTime();
     var nextReset = Math.ceil(now / user.rateLimit.resetRate) * user.rateLimit.resetRate;
@@ -16,6 +20,13 @@ module.exports = function(user, res) {
     res.setHeader('X-RateLimit-Limit', user.rateLimit.limit);
     res.setHeader('X-RateLimit-Remaining', user.rateLimit.remaining);
     res.setHeader('X-RateLimit-Reset', Math.ceil((nextReset - now) / 1000));
+
+    User.findById(user.id, function(err, dbUser) {
+        if (!err) {
+            dbUser = _.assign(dbUser, user);
+            dbUser.save();
+        }
+    });
 
     if (user.rateLimit.remaining === 0) {
         return true;
