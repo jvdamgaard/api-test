@@ -21,6 +21,6 @@ module.exports = function(app) {
     authentication(app);
 
     _.forEach(config.resources, function(resource) {
-        require('./routes/' + resource)(app);
+        require('./ressources/' + resource)(app);
     });
 };
