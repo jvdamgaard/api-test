@@ -2,9 +2,8 @@
 var mongoose = require('mongoose');
 var mongooseCachebox = require('mongoose-cachebox');
 var _ = require('lodash');
-var passport = require('passport');
-require('./passport-settings');
 var config = require('./config');
+var authentication = require('./authentication');
 
 // Cache results in-memory for 60 secs
 mongooseCachebox(mongoose, {
@@ -19,9 +18,7 @@ mongoose.connect('mongodb://localhost/arkitektmn');
 module.exports = function(app) {
 
     // Authentication
-    app.all('/v' + config.version.major + '/*', passport.authenticate('basic', {
-        session: false
-    }));
+    authentication(app);
 
     _.forEach(config.resources, function(resource) {
         require('./routes/' + resource)(app);

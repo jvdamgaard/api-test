@@ -1,12 +1,8 @@
 // Dependencies
 var _ = require('lodash');
 var async = require('async');
-
 var access = require('./access');
-var fields = require('./fields');
 var pagination = require('./pagination');
-var rateLimit = require('./rateLimit');
-var cache = require('./caching');
 var config = require('./config.json');
 
 module.exports = function(app, Model, ressourceName, filters, aliases) {
@@ -39,23 +35,12 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Create page
     app.post(baseUrl, function(req, res) {
-        var user = JSON.parse(req.user);
-
-        // User has access to this ressource
-        if (_.isArray(req.body) && !access(user, 'postMultiple', ressourceName)) {
-            return res.send(403);
-        }
-        if (!_.isArray(req.body) && !access(user, 'postSingle', ressourceName)) {
-            return res.send(403);
-        }
-
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
-        }
 
         // Bulk create
         if (_.isArray(req.body)) {
+            if (!access(req.user, 'postMultiple', ressourceName)) {
+                return res.send(403);
+            }
             async.map(req.body, saveItem, function(err, items) {
                 if (err) {
                     return res.json(400, err);
@@ -65,6 +50,9 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
             // Create single
         } else {
+            if (!access(req.user, 'postSingle', ressourceName)) {
+                return res.send(403);
+            }
             saveItem(req.body, function(err, item) {
                 if (err) {
                     return res.json(400, err);
@@ -80,16 +68,10 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Read a list of pages
     app.get(baseUrl, function(req, res) {
-        var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'getMultiple', ressourceName)) {
+        if (!access(req.user, 'getMultiples', ressourceName)) {
             return res.send(403);
-        }
-
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
         }
 
         var query = Model.find({});
@@ -141,27 +123,27 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Read a single page by id
     app.get(baseUrl + '/:id', function(req, res) {
-        var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'getSingle', ressourceName)) {
+        if (!access(req.user, 'getSingle', ressourceName)) {
             return res.send(403);
         }
 
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
+        var query = Model.findById(req.params.id);
+
+        // Select fields to output
+        if (req.query.fields) {
+            var fieldsString = req.query.fields.split(',').join(' ');
+            query.select(fieldsString);
         }
 
-        if (cache.get(req.url)) {
-            return res.json(cache.get(req.url));
-        }
+        // Optimize output
+        query.lean();
 
-        Model.findById(req.params.id, function(err, item) {
+        query.exec(function(err, item) {
             if (err) {
                 return res.json(404, err);
             }
-            item = fields([item], req)[0];
             return res.json(item);
         });
     });
@@ -172,16 +154,10 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Update a list of pages
     app.put(baseUrl, function(req, res) {
-        var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'putMultiple', ressourceName)) {
+        if (!access(req.user, 'putMultiple', ressourceName)) {
             return res.send(403);
-        }
-
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
         }
         if (!_.isArray(req.body)) {
             return res.json(404, {
@@ -223,16 +199,10 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Update a single page by id
     app.put(baseUrl + '/:id', function(req, res) {
-        var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'putSingle', ressourceName)) {
+        if (!access(req.user, 'putSingle', ressourceName)) {
             return res.send(403);
-        }
-
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
         }
         Model.findById(req.params.id, function(err, item) {
             if (err) {
@@ -254,17 +224,12 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Delete all pages
     app.delete(baseUrl, function(req, res) {
-        var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'deleteMultiple', ressourceName)) {
+        if (!access(req.user, 'deleteMultiple', ressourceName)) {
             return res.send(403);
         }
 
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
-        }
         Model.remove(function(err) {
             if (err) {
                 return res.json(400, err);
@@ -275,17 +240,12 @@ module.exports = function(app, Model, ressourceName, filters, aliases) {
 
     // Delete a single page by id
     app.delete(baseUrl + '/:id', function(req, res) {
-        var user = JSON.parse(req.user);
 
         // User has access to this ressource
-        if (!access(user, 'deleteSingle', ressourceName)) {
+        if (!access(req.user, 'deleteSingle', ressourceName)) {
             return res.send(403);
         }
 
-        // Has user reached rate limit
-        if (rateLimit(user, res)) {
-            return res.send(429);
-        }
         Model.findById(req.params.id, function(err, item) {
             if (err) {
                 return res.json(404, err);

@@ -30,7 +30,7 @@ module.exports = new Schema(_.assign(options, {
         resetRate: {
             type: Number,
             required: true,
-            default: 900000
+            default: 900000 //milliseconds
         },
         remaining: Number,
         currentReset: Number
