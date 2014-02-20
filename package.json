@@ -34,7 +34,8 @@
     "mongoose": "~3.8.7",
     "async": "~0.2.10",
     "passport": "~0.2.0",
-    "passport-http": "~0.2.2"
+    "passport-http": "~0.2.2",
+    "mongoose-cachebox": "~1.2.0"
   },
   "devDependencies": {
     "bluebird": "1.0.1",

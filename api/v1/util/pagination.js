@@ -2,22 +2,26 @@
 var _ = require('lodash');
 var url = require('url');
 
-module.exports = function(items, req, res) {
+module.exports = function(req, res, count) {
     var links = {};
 
     // Page and Per Page values
-    var page = parseInt(req.query.page) || 1;
+    var currentPage = parseInt(req.query.page) || 1;
     var perPage = parseInt(req.query.perpage) || 30;
     if (perPage > 100 || perPage < 1) {
         perPage = 30;
     }
 
-    var total = items.length;
+    var lastPage = Math.ceil(count / perPage);
+    if (currentPage < 0) {
+        currentPage = 0;
+    } else if (currentPage > lastPage) {
+        currentPage = lastPage;
+    }
 
     // Navigate to page
-    var prevPage = page - 1;
-    var nextPage = page + 1;
-    var lastPage = Math.ceil(total / perPage);
+    var prevPage = currentPage - 1;
+    var nextPage = currentPage + 1;
 
     // Full URL to current ressource excl. queries
     var fullUrl = [
@@ -61,13 +65,9 @@ module.exports = function(items, req, res) {
     // Add links to header
     res.links(links);
 
-    // Custom header for total count of items
-    res.setHeader('X-Total-Count', total);
-
     // Slice items to match page and perpage
-    var startItem = (page - 1) * perPage;
-    var endItem = startItem + perPage;
-    items = items.slice(startItem, endItem);
-
-    return items;
+    return {
+        from: (currentPage - 1) * perPage,
+        limit: perPage
+    };
 };

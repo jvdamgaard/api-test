@@ -9,13 +9,6 @@ var Store = require('../models/store');
 // Constants
 var BASE_URL = '/v' + config.version.major + '/stores';
 
-// Filters
-var filters = {
-    brand: function(item, value) {
-        return item.brand === value;
-    }
-};
-
 // Aliases
 var aliases = [{
     url: '/:brand',
@@ -28,5 +21,5 @@ var aliases = [{
 }];
 
 module.exports = function(app) {
-    crud(app, Store, 'stores', filters, aliases);
+    crud(app, Store, 'stores', aliases);
 };
