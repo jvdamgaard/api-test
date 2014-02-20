@@ -1,6 +1,6 @@
 var passport = require('passport');
-var User = require('./models/user');
-var config = require('./config');
+var User = require('../models/user');
+var config = require('../config');
 
 var setRateLimit = function(user) {
     var now = new Date().getTime();

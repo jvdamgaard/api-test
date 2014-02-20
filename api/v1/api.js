@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var mongooseCachebox = require('mongoose-cachebox');
 var _ = require('lodash');
 var config = require('./config');
-var authentication = require('./authentication');
+var authentication = require('./util/authentication');
 
 // Cache results in-memory for 60 secs
 mongooseCachebox(mongoose, {

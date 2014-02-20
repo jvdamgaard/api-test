@@ -1,11 +1,11 @@
 // Dependencies
 var _ = require('lodash');
 var async = require('async');
-var access = require('./access');
-var pagination = require('./pagination');
+var access = require('./util/access');
+var pagination = require('./util/pagination');
 var config = require('./config.json');
 
-module.exports = function(app, Model, ressourceName, filters, aliases) {
+module.exports = function(app, Model, ressourceName, aliases) {
 
     var baseUrl = '/v' + config.version.major + '/' + ressourceName;
 
