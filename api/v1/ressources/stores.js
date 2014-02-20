@@ -6,8 +6,7 @@ var crud = require('../crud');
 // Model
 var Store = require('../models/store');
 
-// Constants
-var BASE_URL = '/v' + config.version.major + '/stores';
+var baseUrl = '/v' + config.version.major + '/stores';
 
 // Aliases
 var aliases = [{
@@ -15,11 +14,11 @@ var aliases = [{
     rewrite: function(req) {
         if (_.indexOf(config.brands, req.params.brand) >= 0) {
             req.query.brand = req.params.brand;
-            req.url = BASE_URL + '?brand=' + req.query.brand;
+            req.url = baseUrl + '?brand=' + req.query.brand;
         }
     }
 }];
 
 module.exports = function(app) {
-    crud(app, Store, 'stores', aliases);
+    crud(app, baseUrl, Store, 'stores', aliases);
 };
