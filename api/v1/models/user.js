@@ -1,8 +1,10 @@
 // Dependencies
 var mongoose = require('mongoose');
+var timestamps = require('mongoose-timestamp');
 
-// Schemas
+// Schema
 var User = require('../schemas/user');
+User.plugin(timestamps);
 
 User.set('toJSON', {
     transform: function(doc, item) {
@@ -15,8 +17,6 @@ User.set('toJSON', {
         // Remove
         delete item._id;
         delete item.__v;
-        delete item.created;
-        delete item.modified;
     }
 });
 

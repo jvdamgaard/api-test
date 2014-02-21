@@ -3,17 +3,18 @@
  */
 
 module.exports = {
-	options: {
-		jshintrc: '.jshintrc',
+    options: {
+        jshintrc: '.jshintrc',
         reporter: require('jshint-stylish')
-	},
+    },
 
-	// Lint all js files
-	all: {
-		files: {
-			src: [
-				'api/**/*.js'
-			]
-		}
-	}
+    // Lint all js files
+    all: {
+        files: {
+            src: [
+                'api/**/*.js',
+                'app.js'
+            ]
+        }
+    }
 };

@@ -9,6 +9,8 @@ module.exports = {
             'app.js'
         ],
         tasks: [
+            'todos:all',
+            'jshint:all',
             'express:server'
         ],
         options: {

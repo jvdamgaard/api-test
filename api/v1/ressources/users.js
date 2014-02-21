@@ -5,8 +5,9 @@ var config = require('../config');
 // Model
 var User = require('../models/user');
 
-var baseUrl = '/v' + config.version.major + '/users';
+var ressourceName = 'users';
+var baseUrl = '/v' + config.version.major + '/' + ressourceName;
 
 module.exports = function(app) {
-    crud(app, baseUrl, User, 'users');
+    crud(app, baseUrl, User, ressourceName);
 };

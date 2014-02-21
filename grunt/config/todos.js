@@ -57,7 +57,8 @@ module.exports = {
     },
     all: {
         src: [
-            'api/**/*.js'
+            'api/**/*.js',
+            'app.js'
         ]
 
     }

@@ -121,13 +121,4 @@ module.exports = new Schema(_.assign(options, {
             }
         }
     },
-
-    created: {
-        type: Date,
-        default: Date.now
-    },
-    modified: {
-        type: Date,
-        default: Date.now
-    },
 }));

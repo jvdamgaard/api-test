@@ -3,7 +3,7 @@ var access = require('../util/access');
 module.exports = function(Model, ressourceName) {
     return function(req, res) {
 
-        // User has access to this ressource
+        // User does not have access to this ressource
         if (!access(req.user, 'getSingle', ressourceName)) {
             return res.send(403);
         }

@@ -16,6 +16,8 @@ module.exports = function(Model, ressourceName) {
 
         // Bulk create
         if (_.isArray(req.body)) {
+
+            // User does not have access to this ressource
             if (!access(req.user, 'postMultiple', ressourceName)) {
                 return res.send(403);
             }
@@ -28,6 +30,8 @@ module.exports = function(Model, ressourceName) {
 
             // Create single
         } else {
+
+            // User does not have access to this ressource
             if (!access(req.user, 'postSingle', ressourceName)) {
                 return res.send(403);
             }

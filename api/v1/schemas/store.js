@@ -61,13 +61,4 @@ module.exports = new Schema({
             required: true
         }
     }],
-
-    created: {
-        type: Date,
-        default: Date.now
-    },
-    modified: {
-        type: Date,
-        default: Date.now
-    },
 });
