@@ -3,12 +3,10 @@ var User = require('../models/user');
 var config = require('../config');
 
 var setRateLimit = function(user) {
-    var now = new Date().getTime();
-    var nextReset = Math.ceil(now / user.rateLimit.resetRate) * user.rateLimit.resetRate;
+    var now = new Date().getTime() / 1000;
 
-    // Reset limit
-    if (!user.rateLimit.currentReset || user.rateLimit.currentReset < nextReset) {
-        user.rateLimit.currentReset = nextReset;
+    if (user.rateLimit.nextReset < now) {
+        user.rateLimit.nextReset = Math.ceil(now + user.rateLimit.resetRate);
         user.rateLimit.remaining = user.rateLimit.limit;
     }
 
@@ -38,9 +36,8 @@ var setRateLimitHeaders = function(req, res, next) {
     res.setHeader('X-RateLimit-Limit', req.user.rateLimit.limit);
     res.setHeader('X-RateLimit-Remaining', req.user.rateLimit.remaining);
 
-    var now = new Date().getTime();
-    var nextReset = req.user.rateLimit.currentReset + req.user.rateLimit.resetRate;
-    res.setHeader('X-RateLimit-Reset', Math.ceil((nextReset - now) / 1000));
+    var now = new Date().getTime() / 1000;
+    res.setHeader('X-RateLimit-Reset', Math.ceil(req.user.rateLimit.nextReset - now));
 
     if (req.user.rateLimit.remaining === 0) {
         return res.send(429, {

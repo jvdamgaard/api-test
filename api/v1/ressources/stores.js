@@ -1,7 +1,7 @@
 // Dependencies
 var _ = require('lodash');
 var config = require('../config.json');
-var crud = require('../crud');
+var restfull = require('../restfull');
 
 // Model
 var Store = require('../models/store');
@@ -22,5 +22,5 @@ var aliases = [{
 }];
 
 module.exports = function(app) {
-    crud(app, baseUrl, Store, ressourceName, aliases);
+    restfull(app, baseUrl, Store, ressourceName, aliases);
 };

@@ -1,5 +1,5 @@
 // Dependencies
-var crud = require('../crud');
+var restfull = require('../restfull');
 var config = require('../config');
 
 // Model
@@ -9,5 +9,5 @@ var ressourceName = 'users';
 var baseUrl = '/v' + config.version.major + '/' + ressourceName;
 
 module.exports = function(app) {
-    crud(app, baseUrl, User, ressourceName);
+    restfull(app, baseUrl, User, ressourceName);
 };

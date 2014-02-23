@@ -40,14 +40,14 @@ module.exports = function(req, res, count) {
 
     // First page
     var firstQuery = _.union(queries, ['page=1']).join('&');
-    links.first = fullUrl + '?' + firstQuery;
+    links.first = encodeURI(fullUrl + '?' + firstQuery);
 
     // Prev page
     if (prevPage > 0) {
         var prevQuery = _.union(queries, [
             'page=' + prevPage
         ]).join('&');
-        links.prev = fullUrl + '?' + prevQuery;
+        links.prev = encodeURI(fullUrl + '?' + prevQuery);
     }
 
     // Next page
@@ -55,12 +55,12 @@ module.exports = function(req, res, count) {
         var nextQuery = _.union(queries, [
             'page=' + nextPage
         ]).join('&');
-        links.next = fullUrl + '?' + nextQuery;
+        links.next = encodeURI(fullUrl + '?' + nextQuery);
     }
 
     // Last page
     var lastQuery = _.union(queries, ['page=' + lastPage]).join('&');
-    links.last = fullUrl + '?' + lastQuery;
+    links.last = encodeURI(fullUrl + '?' + lastQuery);
 
     // Add links to header
     res.links(links);

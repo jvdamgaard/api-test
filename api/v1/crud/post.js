@@ -4,7 +4,9 @@ var access = require('../util/access');
 
 module.exports = function(Model, ressourceName) {
     var saveItem = function(body, callback) {
+        console.log(body);
         var item = new Model(body);
+        console.log(item);
         item.save(function(err) {
             if (err) {
                 return callback(err);

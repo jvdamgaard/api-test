@@ -21,6 +21,14 @@ _.forEach(config.ressources, function(ressource) {
 });
 
 module.exports = new Schema(_.assign(options, {
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
     rateLimit: {
         limit: {
             type: Number,
@@ -30,10 +38,16 @@ module.exports = new Schema(_.assign(options, {
         resetRate: {
             type: Number,
             required: true,
-            default: 900000 //milliseconds
+            default: 900 //seconds
         },
-        remaining: Number,
-        currentReset: Number
+        remaining: {
+            type: Number,
+            default: 0
+        },
+        nextReset: {
+            type: Number,
+            default: 0
+        }
     },
     ressources: {
         general: {
