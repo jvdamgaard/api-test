@@ -1,5 +1,4 @@
-// Dependencies
-var _ = require('lodash');
+var aliasRewrite = require('./util/aliases');
 
 var post = require('./crud/post');
 var getSingle = require('./crud/getSingle');
@@ -12,14 +11,7 @@ var deleteMultiple = require('./crud/deleteMultiple');
 module.exports = function(app, baseUrl, Model, ressourceName, aliases) {
 
     // Aliases
-    if (aliases) {
-        _.forEach(aliases, function(alias) {
-            app.get(baseUrl + alias.url, function(req, res, next) {
-                alias.rewrite(req);
-                next();
-            });
-        });
-    }
+    aliasRewrite(app, aliases, baseUrl);
 
     // Create single and multiple items
     app.post(baseUrl, post(Model, ressourceName));
