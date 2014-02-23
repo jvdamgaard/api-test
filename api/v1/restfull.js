@@ -1,12 +1,12 @@
 var aliasRewrite = require('./util/aliases');
 
-var post = require('./crud/post');
-var getSingle = require('./crud/getSingle');
-var getMultiple = require('./crud/getMultiple');
-var putSingle = require('./crud/putSingle');
-var putMultiple = require('./crud/putMultiple');
-var deleteSingle = require('./crud/deleteSingle');
-var deleteMultiple = require('./crud/deleteMultiple');
+var post = require('./restfull/post');
+var getSingle = require('./restfull/getSingle');
+var getMultiple = require('./restfull/getMultiple');
+var putSingle = require('./restfull/putSingle');
+var putMultiple = require('./restfull/putMultiple');
+var deleteSingle = require('./restfull/deleteSingle');
+var deleteMultiple = require('./restfull/deleteMultiple');
 
 module.exports = function(app, baseUrl, Model, ressourceName, aliases) {
 
