@@ -13,7 +13,7 @@ var baseUrl = '/v' + config.version.major + '/' + ressourceName;
 var aliases = [{
     method: 'get',
     src: '/:brand',
-    dist: '?brand=:brand',
+    // dist: '?brand=:brand', // default value
     match: {
         brand: function(brand) {
             return _.indexOf(config.brands, brand) >= 0;

@@ -24,6 +24,15 @@ var rewriteAlias = function(alias, baseUrl) {
             return next();
         }
 
+        // Default dist
+        if (!alias.dist) {
+            var distQueries = [];
+            _.forOwn(req.params, function(val, key) {
+                distQueries.push(key + '=:' + key);
+            });
+            alias.dist = '?' + distQueries.join('&');
+        }
+
         var newUrl = url.parse(baseUrl + alias.dist, true);
 
         // Rewrite query
