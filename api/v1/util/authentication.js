@@ -49,7 +49,16 @@ var setRateLimitHeaders = function(req, res, next) {
 };
 
 module.exports = function(app) {
-    app.all('/v' + config.version.major + '/*', passport.authenticate('basic', {
+    app.get('/v' + config.version.major + '/*', passport.authenticate('basic', {
+        session: false
+    }), setRateLimitHeaders);
+    app.post('/v' + config.version.major + '/*', passport.authenticate('basic', {
+        session: false
+    }), setRateLimitHeaders);
+    app.delete('/v' + config.version.major + '/*', passport.authenticate('basic', {
+        session: false
+    }), setRateLimitHeaders);
+    app.put('/v' + config.version.major + '/*', passport.authenticate('basic', {
         session: false
     }), setRateLimitHeaders);
 };

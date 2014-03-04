@@ -10,6 +10,7 @@ Store.set('toJSON', {
     transform: function(doc, item) {
 
         // Add
+        // item['@link'] = 'http://localhost:9000/stores/' + item._id;
 
         // Transform
         item.id = item._id;
