@@ -25,7 +25,7 @@ app.use(allowCrossDomain);
 app.use(app.router);
 
 // Api v1
-require('./api/v1/api')(app);
+require('./facade/router')(app);
 
 app.listen(9000);
 

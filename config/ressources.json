@@ -1,0 +1,26 @@
+[{
+    "name": "stores",
+    "version": 1,
+    "service": "services/stores",
+    "routes": {
+        "get": {
+            "/": "get",
+            "/:id": "getById"
+        },
+        "post": {
+            "/": "save"
+        },
+        "put": {
+            "/": "update",
+            "/:id": "updateById"
+        },
+        "delete": {
+            "/": "delete",
+            "/:id": "deleteById"
+        }
+    },
+    "middlewares": [
+        "middlewares/authentication",
+        "middlewares/rate-limit"
+    ]
+}]
